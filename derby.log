@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Thu Oct 31 14:27:39 ART 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0192-e39e-5a8f-00000eec8180 
+on database directory memory:/home/enrique/refactor-ifs/userauth with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@1dbd16a6 
+Loaded from file:/home/enrique/.m2/repository/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
+java.vendor=Ubuntu
+java.runtime.version=17.0.12+7-Ubuntu-1ubuntu222.04
+user.dir=/home/enrique/refactor-ifs
+os.name=Linux
+os.arch=amd64
+os.version=6.8.0-47-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
