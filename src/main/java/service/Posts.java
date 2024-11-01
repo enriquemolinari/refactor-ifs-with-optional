@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // sudo docker run -d --name some-redis -p 6379:6379 redis
 // sudo docker rm some-redis
@@ -27,19 +28,19 @@ public class Posts {
     }
 
     public List<LatestsPost> latestPosts(Long authorId) {
-        String valueFromCache = null;
+        Optional<String> valueFromCache = Optional.empty();
 
         try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
-            valueFromCache = jedis.get(authorId.toString()); //Feo: devuelve null si no esta... me obliga la IF
+            valueFromCache = Optional.ofNullable(jedis.get(authorId.toString())); //Feo: devuelve null si no esta... me obliga la IF
         }
 
-        if (valueFromCache != null) {
+        return valueFromCache.map(jsonString -> {
             Gson gson = new Gson();
             Type listType = new TypeToken<ArrayList<LatestsPost>>() {
             }.getType();
-            List<LatestsPost> latestsPosts = gson.fromJson(valueFromCache, listType);
+            List<LatestsPost> latestsPosts = gson.fromJson(jsonString, listType);
             return latestsPosts;
-        } else {
+        }).orElseGet(() -> {
             return new Tx(emf).inTx(em -> {
                 var query = em.createQuery("from Post order by fechaPublicacion desc", Post.class).setMaxResults(2);
                 List<Post> resultList = query.getResultList();
@@ -51,6 +52,26 @@ public class Posts {
                 }
                 return lastestsPosts;
             });
-        }
+        });
+
+//        if (valueFromCache != null) {
+//            Gson gson = new Gson();
+//            Type listType = new TypeToken<ArrayList<LatestsPost>>() {
+//            }.getType();
+//            List<LatestsPost> latestsPosts = gson.fromJson(valueFromCache, listType);
+//            return latestsPosts;
+//        } else {
+//            return new Tx(emf).inTx(em -> {
+//                var query = em.createQuery("from Post order by fechaPublicacion desc", Post.class).setMaxResults(2);
+//                List<Post> resultList = query.getResultList();
+//                var lastestsPosts = resultList.stream().map(p -> p.toLatest()).toList();
+//                Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter()).create();
+//                String json = gson.toJson(lastestsPosts);
+//                try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
+//                    jedis.set(authorId.toString(), json);
+//                }
+//                return lastestsPosts;
+//            });
+//        }
     }
 }
