@@ -27,14 +27,6 @@ public class Posts {
         this.emf = emf;
     }
 
-    private Optional<String> latestPostsFromCache(Long authorId) {
-        Optional<String> valueFromCache;
-        try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
-            valueFromCache = Optional.ofNullable(jedis.get(authorId.toString())); //Feo: devuelve null si no esta... me obliga la IF
-        }
-        return valueFromCache;
-    }
-
     public List<LatestsPost> latestPosts(Long authorId) {
         return latestPostsFromCache(authorId).map(jsonString -> {
             Gson gson = new Gson();
@@ -43,17 +35,29 @@ public class Posts {
             List<LatestsPost> latestsPosts = gson.fromJson(jsonString, listType);
             return latestsPosts;
         }).orElseGet(() -> {
-            return new Tx(emf).inTx(em -> {
-                var query = em.createQuery("from Post order by fechaPublicacion desc", Post.class).setMaxResults(2);
-                List<Post> resultList = query.getResultList();
-                var lastestsPosts = resultList.stream().map(p -> p.toLatest()).toList();
-                Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter()).create();
-                String json = gson.toJson(lastestsPosts);
-                try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
-                    jedis.set(authorId.toString(), json);
-                }
-                return lastestsPosts;
-            });
+            return latestPostFromDb(authorId);
+        });
+    }
+
+    private Optional<String> latestPostsFromCache(Long authorId) {
+        Optional<String> valueFromCache;
+        try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
+            valueFromCache = Optional.ofNullable(jedis.get(authorId.toString())); //Feo: devuelve null si no esta... me obliga la IF
+        }
+        return valueFromCache;
+    }
+
+    private List<LatestsPost> latestPostFromDb(Long authorId) {
+        return new Tx(emf).inTx(em -> {
+            var query = em.createQuery("from Post order by fechaPublicacion desc", Post.class).setMaxResults(2);
+            List<Post> resultList = query.getResultList();
+            var lastestsPosts = resultList.stream().map(p -> p.toLatest()).toList();
+            Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter()).create();
+            String json = gson.toJson(lastestsPosts);
+            try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
+                jedis.set(authorId.toString(), json);
+            }
+            return lastestsPosts;
         });
     }
 }
