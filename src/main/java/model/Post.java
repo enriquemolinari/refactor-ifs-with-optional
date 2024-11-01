@@ -1,9 +1,10 @@
 package model;
 
 import jakarta.persistence.*;
+import service.LatestsPost;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 public class Post {
@@ -15,14 +16,16 @@ public class Post {
     private String titulo;
     @ManyToOne(cascade = CascadeType.PERSIST)
     private Author author;
+    private LocalDateTime fechaPublicacion;
 
     protected Post() {
     }
 
-    public Post(String titulo, String texto, Author author) {
+    public Post(String titulo, String texto, Author author, LocalDateTime fechaPublicacion) {
         this.titulo = titulo;
         this.texto = texto;
         this.author = author;
+        this.fechaPublicacion = fechaPublicacion;
     }
 
     private Long getId() {
@@ -55,6 +58,23 @@ public class Post {
 
     private void setAuthor(Author author) {
         this.author = author;
+    }
+
+    private LocalDateTime getFechaPublicacion() {
+        return fechaPublicacion;
+    }
+
+    private void setFechaPublicacion(LocalDateTime fechaPublicacion) {
+        this.fechaPublicacion = fechaPublicacion;
+    }
+
+    public String title() {
+        return titulo;
+    }
+
+    public LatestsPost toLatest() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        return new LatestsPost(this.titulo, this.fechaPublicacion.format(formatter));
     }
 }
 

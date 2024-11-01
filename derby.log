@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Thu Oct 31 14:27:39 ART 2024:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0192-e39e-5a8f-00000eec8180 
+Fri Nov 01 14:49:13 ART 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0192-e8d8-7679-00000e7a6598 
 on database directory memory:/home/enrique/refactor-ifs/userauth with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@1dbd16a6 
 Loaded from file:/home/enrique/.m2/repository/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
 java.vendor=Ubuntu

@@ -36,4 +36,8 @@ public class Author {
     private void setSurname(String surname) {
         this.surname = surname;
     }
+
+    public Long id() {
+        return id;
+    }
 }
